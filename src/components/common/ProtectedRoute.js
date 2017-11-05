@@ -15,6 +15,7 @@ class ProtectedRoute extends Component {
 
     renderRoute = (...args) => {
         const {authorized} = this.props
+        console.log('************ AUTHORIZED: ', authorized);
         const AuthorizedComponent = this.props.component
         return authorized ? <AuthorizedComponent {...args} /> : <h2>UnAuthorized</h2>
     }
