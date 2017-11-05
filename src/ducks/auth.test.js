@@ -1,11 +1,12 @@
 import firebase from 'firebase'
 import {
-    signUpSaga, signInSaga,
+    signUpSaga, signInSaga, watchStatusChangeSaga,
     signUp, signIn,
     SIGN_UP_START, SIGN_UP_SUCCESS, SIGN_UP_ERROR,
-    SIGN_IN_START, SIGN_IN_ERROR
+    SIGN_IN_START, SIGN_IN_SUCCESS, SIGN_IN_ERROR
 } from './auth'
 import {all, take, call, put} from 'redux-saga/effects'
+import {replace} from 'react-router-redux'
 
 
 it('should sign up user', () => {
@@ -76,4 +77,17 @@ it('should sign in user', () => {
         payload: {error}
     }))
 
+})
+
+it('should redirect to /admin on SIGN_IN_SUCCESS', () => {
+
+    const gen = watchStatusChangeSaga()
+
+    expect(gen.next().value).toEqual(take(SIGN_IN_SUCCESS))
+
+    const requestAction = {
+        type: SIGN_IN_SUCCESS
+    }
+
+    expect(gen.next(requestAction).value).toEqual(put(replace('/admin')))
 })

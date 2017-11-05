@@ -3,6 +3,7 @@ import {Record} from 'immutable'
 import firebase from 'firebase'
 import {createSelector} from 'reselect'
 import {call, put, all, take} from 'redux-saga/effects'
+import {replace} from 'react-router-redux'
 
 /**
  * Constants
@@ -128,9 +129,20 @@ export function * signInSaga() {
     }
 }
 
+export function * watchStatusChangeSaga() {
+
+    while(true) {
+        yield take(SIGN_IN_SUCCESS)
+
+        yield (put(replace('/admin')))
+    }
+
+}
+
 export function * saga() {
     yield all([
         signUpSaga(),
         signInSaga(),
+        watchStatusChangeSaga()
     ])
 }
