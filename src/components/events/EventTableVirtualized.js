@@ -1,7 +1,14 @@
 import React, { Component } from 'react'
 import {Table, Column} from 'react-virtualized'
 import {connect} from 'react-redux'
-import {fetchAllEvents, selectEvent, selectedEventsSelector, eventListSelector, loadedSelector, loadingSelector} from '../../ducks/events'
+import {
+    fetchAllEvents,
+    selectEvent,
+    selectedEventsSelector,
+    eventListSelector,
+    loadedSelector,
+    loadingSelector
+} from '../../ducks/events'
 import Loader from '../common/Loader'
 import 'react-virtualized/styles.css'
 
@@ -19,7 +26,7 @@ class EventTableVirtualized extends Component {
         return (
             <Table
                 height={500}
-                width = {600}
+                width = {700}
                 rowHeight={40}
                 rowHeaderHeight={40}
                 rowGetter={this.rowGetter}
@@ -46,7 +53,8 @@ class EventTableVirtualized extends Component {
         )
     }
 
-    rowGetter = ({ index }) => this.props.events[index]
+    rowGetter = ({ index }) => {
+        return this.props.events[index];}
 }
 
 export default connect((state, props) => ({

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import EventsTable from '../events/EventTableVirtualized'
+import EventsTable from '../events/EventTableVirtualizedInfiniteLoading'
 
 class EventsPage extends Component {
     static propTypes = {
