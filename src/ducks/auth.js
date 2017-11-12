@@ -2,7 +2,8 @@ import {appName} from '../config'
 import {Record} from 'immutable'
 import firebase from 'firebase'
 import {createSelector} from 'reselect'
-import {call, put, all, take} from 'redux-saga/effects'
+import {call, put, all, take, spawn} from 'redux-saga/effects'
+import {eventChannel} from 'redux-saga'
 import {replace} from 'react-router-redux'
 
 /**
@@ -69,15 +70,6 @@ export function signIn(email, password) {
     }
 }
 
-firebase.auth().onAuthStateChanged(user => {
-    if (!user) return
-
-    window.store.dispatch({
-        type: SIGN_IN_SUCCESS,
-        payload: { user }
-    })
-})
-
 /**
  * Sagas
  **/
@@ -126,11 +118,32 @@ export const signInSaga = function * () {
     }
 }
 
-export function * watchStatusChangeSaga() {
-    while (true) {
-        yield take(SIGN_IN_SUCCESS)
+const createAuthSocket = () => eventChannel(emit => {
+    const callback = user => emit({ user })
 
-        yield (put(replace('/admin')))
+    let unsubscribe = firebase.auth().onAuthStateChanged(callback)
+
+    return unsubscribe
+})
+
+export function * watchStatusChangeSaga() {
+
+    const chan = yield call(createAuthSocket)
+
+    while (true) {
+
+        const { user } = yield take(chan)
+
+        if(user){
+
+            yield put({
+                type: SIGN_IN_SUCCESS,
+                payload: { user }
+            })
+
+            yield (put(replace('/admin')))
+
+        }
     }
 }
 
