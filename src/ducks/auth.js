@@ -141,7 +141,7 @@ export function * watchStatusChangeSaga() {
                 payload: { user }
             })
 
-            yield (put(replace('/admin')))
+            yield (put(replace('/people')))
 
         }
     }

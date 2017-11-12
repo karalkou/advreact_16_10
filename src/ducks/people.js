@@ -177,24 +177,61 @@ const createPeopleSocket = () => eventChannel(emit => {
 
     ref.on('value', callback)
 
-    return () => ref.off('value', callback)
+    return () => {console.log('YA-HA_HA');ref.off('value', callback)}
 })
+
+export const cancelableRealtimePeopleSyncSaga = function * () {
+    let task
+    while (true) {
+        const {payload} = yield take('@@router/LOCATION_CHANGE')
+        console.log('---payload cancelableRealtimePeopleSyncSaga: ', payload);
+
+        if (payload && payload.pathname.includes('people')) {
+            task = yield fork(realtimePeopleSyncSaga)
+
+        } else if (task) {
+            yield cancel(task)
+        }
+    }
+}
 
 export const realtimePeopleSyncSaga = function * () {
     const chan = yield call(createPeopleSocket)
 
-    while (true) {
-        const { data } = yield take(chan)
+    try{
+        while (true) {
 
-        yield put({
-            type: FETCH_ALL_SUCCESS,
-            payload: data.val()
-        })
+
+            /* Вопрос:
+             * Не понимаю, почему следующие две строчки срабатывают только один раз
+             * если yield spawn(realtimePeopleSyncSaga)
+             * */
+            const {payload} = yield take('@@router/LOCATION_CHANGE')
+            console.log('---payload: ', payload);
+
+
+
+            const { data } = yield take(chan)
+
+            yield put({
+                type: FETCH_ALL_SUCCESS,
+                payload: data.val()
+            })
+        }
+    } finally {
+        if (yield cancelled()) {
+            console.log('---start to cancel');
+            yield call([chan, chan.close])
+            console.log('---finish to cancel');
+
+        }
     }
+
 }
 
 export function * saga() {
-    yield spawn(realtimePeopleSyncSaga)
+    // yield spawn(realtimePeopleSyncSaga)
+    yield spawn(cancelableRealtimePeopleSyncSaga)
 
     yield all([
         takeEvery(ADD_PERSON_REQUEST, addPersonSaga),
